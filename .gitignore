@@ -1,0 +1,9 @@
+.ignore
+.DS_Store
+.refs
+.cache
+*.map
+**/node_modules
+**/dist
+**/target
+**/*-error.log
