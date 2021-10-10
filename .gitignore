@@ -3,6 +3,8 @@
 .refs
 .cache
 *.map
+**/*.lock
+**/*-lock.*
 **/node_modules
 **/dist
 **/target
