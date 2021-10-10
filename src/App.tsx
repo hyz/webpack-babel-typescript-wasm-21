@@ -12,7 +12,12 @@ export function App() {
   // }, []);
 
   //return <Observer>{() => (wasmEngine.loading ? <h1>Loading...</h1> : <Greet />)}</Observer>;
-  return <Greet />;
+  return (
+    <div>
+      <label>Greet</label>
+      <Greet />
+    </div>
+  );
 }
 
 //export default App;

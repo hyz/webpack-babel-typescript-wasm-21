@@ -50,7 +50,6 @@ export function Greet() {
 
   return (
     <div style={styles.container}>
-      <label>Greet</label>
       <canvas ref={canvasRef} width="600" height="800"></canvas>
     </div>
   );
