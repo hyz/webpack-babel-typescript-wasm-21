@@ -12,9 +12,9 @@ export function usePkg(): PkgIndex {
   console.log(`wasm:pkg ${typeof pkg}: ${JSON.stringify(pkg)}`);
 
   React.useEffect(() => {
-    //import('./pkg/index').then(init => {
-    //  init.default().then(instance => {
-    //    setPkg({ instance, run: init.start_game, greet: init.greet, });
+    //import('./pkg/index').then(index => {
+    //  index.default().then(xo => {
+    //    setPkg({ index, xo, });
     //  });
     //});
     (async () => {
