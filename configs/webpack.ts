@@ -122,7 +122,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
           // static: '',
         },
         watchOptions: {
-          ignored: /node_modules/,
+          ignored: ['**/node_modules', '**/target', '**/dist'],
         },
       }
     : {};
@@ -173,7 +173,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
 
       rules: [
         {
-          exclude: /(\.d\.ts|target)$/, // Ignore Declaration typescript files.
+          exclude: /(\.d\.ts)$/, // Ignore Declaration typescript files.
         },
         {
           test: /\.worker\.[tj]s$/,
