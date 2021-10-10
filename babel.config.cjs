@@ -12,16 +12,19 @@ module.exports = function (api) {
   console.log(`babel.config.js: ${JSON.stringify(api)}, env: ${api.env()}`);
   const isDev = api.env() === 'development';
 
-  const presets = ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'];
+  const presets = ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript']; // , ...(!isDev && ['minify'])
   const plugins = [
+    '@babel/plugin-syntax-dynamic-import',
+    '@babel/plugin-syntax-import-meta',
     ['@babel/plugin-proposal-decorators', {legacy: true}],
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-proposal-object-rest-spread',
     '@babel/plugin-transform-typescript',
     '@babel/plugin-transform-runtime',
     //'@emotion/babel-plugin',
-    ...[isDev && 'react-refresh/babel'].filter(Boolean),
-  ];
+    isDev && 'react-refresh/babel',
+    // "react-hot-loader/babel"
+  ].filter(Boolean);
   const overrides = [
     {test: /\.ts$/, presets: ['@babel/preset-typescript']},
     {

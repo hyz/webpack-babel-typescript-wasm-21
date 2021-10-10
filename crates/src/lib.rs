@@ -31,7 +31,7 @@ pub fn main_js() -> Result<(), JsValue> {
 
 #[wasm_bindgen]
 pub fn greet(_canvas: HtmlCanvasElement, name: String) {
-    log!("hello {}", name);
+    log!("greet {}, nice.", name);
 }
 
 // TODO move all the complexity of interaction into graphics.

@@ -23,6 +23,7 @@ const autoprefixer = require('autoprefixer'); // help tailwindcss to work
 import * as CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
 //const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+import {SubresourceIntegrityPlugin} from 'webpack-subresource-integrity';
 
 import CompressionPlugin from 'compression-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -133,8 +134,9 @@ export default function configure(paths: Paths, opts: Options): Configuration {
     entry: [paths.index],
     output: {
       clean: true,
+      compareBeforeEmit: false,
       path: paths.output,
-      publicPath: '/dist/',
+      publicPath: '/dist/', // : isJamstack? "/" : "/static/",
 
       // We want to hash filenames in production, so changed files
       // would have a different name and won't be cached.
@@ -147,6 +149,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
       //webassemblyModuleFilename: '[hash:8].wasm',
       // library: '',
       // libraryTarget: 'es5',
+      crossOriginLoading: 'anonymous',
     },
 
     // Fail out on the first error instead of tolerating it.
@@ -184,7 +187,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
           test: /\.(js|cjs|mjs|jsx|ts|tsx)$/,
           exclude: /node_modules/,
           loader: 'babel-loader', //['babel-loader', 'ts-loader'],
-          options: {rootMode: 'upward'},
+          //options: {rootMode: 'upward'},
           //options: { plugins: [isDev && 'react-refresh/babel'].filter(Boolean), },
         },
         // mergeLoaderOptions('ts-loader', {
@@ -342,11 +345,12 @@ export default function configure(paths: Paths, opts: Options): Configuration {
 
       isProduction &&
         new CompressionPlugin({
-          test: /\.(js|svg)$/,
-          filename: '[path].br[query]',
+          test: /\.(js|css|html|ttf|svg|woff|woff2|eot)$/,
+          // filename: '[path].br[query]', //!!! Conflict: Multiple assets
+          filename: '[path][base].br', // * @default '[path][base].gz'
           algorithm: 'brotliCompress',
           compressionOptions: {level: 11},
-        }), // (as any),
+        }),
 
       isProduction &&
         new MiniCssExtractPlugin.default({
@@ -354,10 +358,11 @@ export default function configure(paths: Paths, opts: Options): Configuration {
           chunkFilename: '[id].[contenthash].css',
           ignoreOrder: true,
         }),
+      isProduction && new SubresourceIntegrityPlugin(),
     ].filter(Boolean),
 
     resolve: {
-      extensions: ['.js', '.ts', '.jsx', '.tsx', '.glsl', '.vert', '.frag'],
+      extensions: ['.js', '.ts', '.jsx', '.tsx'], // , '.glsl', '.vert', '.frag'],
       //alias: tsconfig.compilerOptions.paths as {[index: string]: string[]};
       alias: {}, // {src: (paths.src), assets: (paths.assets)},
       plugins: [new TsconfigPathsPlugin()],
