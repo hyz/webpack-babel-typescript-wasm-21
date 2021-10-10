@@ -347,9 +347,9 @@ export default function configure(paths: Paths, opts: Options): Configuration {
         new CompressionPlugin({
           test: /\.(js|css|html|ttf|svg|woff|woff2|eot)$/,
           // filename: '[path].br[query]', //!!! Conflict: Multiple assets
-          filename: '[path][base].br', // * @default '[path][base].gz'
-          algorithm: 'brotliCompress',
-          compressionOptions: {level: 11},
+          //filename: '[path][base].br', // * @default '[path][base].gz'
+          //algorithm: 'brotliCompress', // default gzip
+          compressionOptions: {level: 9},
         }),
 
       isProduction &&
@@ -358,6 +358,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
           chunkFilename: '[id].[contenthash].css',
           ignoreOrder: true,
         }),
+
       isProduction && new SubresourceIntegrityPlugin(),
     ].filter(Boolean),
 
