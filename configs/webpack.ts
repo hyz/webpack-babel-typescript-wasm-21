@@ -282,7 +282,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
         outDir: paths.wasmOutDir, //'../pkg',
         outName: 'index',
         extraArgs: '--target web', //'--target web --mode normal',
-        //forceMode: 'production',
+        forceMode: opts.mode,
       }),
 
       // Copy content to the output directory without processing it.

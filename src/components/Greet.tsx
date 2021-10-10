@@ -37,7 +37,7 @@ export function Greet() {
     if (pkg && canvasRef.current) {
       const canvas: HTMLCanvasElement = canvasRef.current;
       pkg.greet(canvas, 'Alex');
-      pkg.run(canvas, 'Alex', 'Angelica');
+      pkg.start_game(canvas, 'Alex', 'Angelica');
     }
   }, [canvasRef, pkg]);
 
