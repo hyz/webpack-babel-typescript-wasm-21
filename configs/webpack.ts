@@ -305,7 +305,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
         favicon: paths.favicon,
         title: 'Hello',
         templateParameters: {
-          PUBLIC_URL: paths.public,
+          PUBLIC_URL: paths.public, // test, nonsense
         },
         minify: isProduction
           ? {
@@ -346,7 +346,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
       isProduction &&
         new CompressionPlugin({
           test: /\.(js|css|html|ttf|svg|woff|woff2|eot)$/,
-          // filename: '[path].br[query]', //!!! Conflict: Multiple assets
+          //!!! filename: '[path].br[query]', //! Conflict: Multiple assets
           //filename: '[path][base].br', // * @default '[path][base].gz'
           //algorithm: 'brotliCompress', // default gzip
           compressionOptions: {level: 9},

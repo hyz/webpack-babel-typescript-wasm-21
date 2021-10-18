@@ -26,3 +26,41 @@ export function usePkg(): PkgIndex {
 
   return pkg?.index;
 }
+
+// export function useWasmPkg(): PkgIndex {
+//   const pkg = React.useMemo<PkgState>(async () => {
+//     return undefined;
+//     //return import('./pkg/index')
+//     //  .then(index => {
+//     //    return index
+//     //      .default()
+//     //      .then(xo => {
+//     //        return {index, xo};
+//     //      })
+//     //      .finally();
+//     //  })
+//     //  .finally();
+//     // return (async () => {
+//     //   const index = await import('./pkg/index');
+//     //   const xo = await index.default();
+//     //   return {index, xo};
+//     // })();
+//     //return undefined as unknown as PkgState
+//   }, undefined);
+//   console.log(`wasm:pkg ${typeof pkg}: ${JSON.stringify(pkg)}`);
+//
+//   React.useEffect(() => {
+//     //import('./pkg/index').then(index => {
+//     //  index.default().then(xo => {
+//     //    setPkg({ index, xo, });
+//     //  });
+//     //});
+//     (async () => {
+//       const index = await import('./pkg/index');
+//       const xo = await index.default();
+//       setPkg({index, xo});
+//     })();
+//   }, []);
+//
+//   return pkg?.index;
+// }

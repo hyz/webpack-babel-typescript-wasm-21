@@ -1,6 +1,11 @@
 ####!/usr/bin/env just --working-directory . --justfile
 # vim: set ft=make :
 
+usage:
+	yarn build
+	basic-http-server .
+	echo "open http://4000.local/dist"
+
 default:
 	yarn info webpack
 
