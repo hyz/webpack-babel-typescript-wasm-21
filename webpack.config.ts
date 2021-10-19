@@ -1,14 +1,14 @@
 import * as path from 'path';
-import merge from 'webpack-merge';
+//import merge from 'webpack-merge';
 
-import type * as webpack from 'webpack';
+import type {Configuration, WebpackOptionsNormalized} from 'webpack';
 import type * as DevServerTypes from 'webpack-dev-server';
 import configure from './configs/webpack';
 
-type Configuration = webpack.Configuration | webpack.WebpackOptionsNormalized;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function (env: any, opts: {mode: 'production' | 'development'}): Configuration {
+export default function (
+  env: unknown,
+  opts: {mode: 'production' | 'development'}
+): Configuration | WebpackOptionsNormalized {
   //console.log(JSON.stringify(env), __filename);
   process.env.NODE_ENV = opts.mode;
   process.env.BABEL_ENV = opts.mode;
@@ -18,10 +18,6 @@ export default function (env: any, opts: {mode: 'production' | 'development'}): 
   const isServing = isDev && process.argv.includes('serve');
 
   const paths = {
-    //output: path.resolve(__dirname, 'dist'),
-    //outputFilename: isDev ? '[name].js' : '[name].[contenthash:8].js',
-    //outputChunkFilename: isDev ? '[name].js' : '[name].[contenthash:8].chunk.js',
-    //outputPublicPath: '/dist/', // : isJamstack? "/" : "/static/",
     entry: './src/index.tsx',
 
     src: './src',
@@ -33,38 +29,37 @@ export default function (env: any, opts: {mode: 'production' | 'development'}): 
     favicon: './public/favicon.ico',
   };
 
-  const output: webpack.Configuration['output'] = {
+  const output: Configuration['output'] = {
     path: path.resolve(__dirname, 'dist'),
     filename: isDev ? '[name].js' : '[name].[contenthash:8].js',
     chunkFilename: isDev ? '[name].js' : '[name].[contenthash:8].chunk.js',
     publicPath: '/dist/', // : isJamstack? "/" : "/static/",
     assetModuleFilename: 'assets/[hash][ext][query]',
     //webassemblyModuleFilename: '[hash:8].wasm',
-    // library: '',
+    //library: '',
     // libraryTarget: 'es5',
     crossOriginLoading: 'anonymous',
   };
 
-  //const devServe = isDev && process.argv.includes('serve');
-
-  const devServer /*:webpack.WebpackOptionsNormalized*/ = {
-    devServer: <DevServerTypes.Configuration>{
-      //contentBase: paths.output,
-      allowedHosts: 'all',
-      // host: '',
-      port: process.env.PORT || 8080,
-      compress: true,
-      liveReload: true,
-      hot: true,
-      watchFiles: ['./src/**', output.path],
-      // static: '',
+  const devServer: DevServerTypes.Configuration = {
+    //contentBase: paths.output,
+    allowedHosts: 'all',
+    // host: '',
+    port: process.env.PORT || 8080,
+    compress: true,
+    liveReload: true,
+    hot: true,
+    watchFiles: <DevServerTypes.WatchFiles>{
+      paths: ['./src/**', output.path],
+      options: {
+        ignored: ['**/node_modules', '**/target', '**/dist'],
+      },
     },
-    watchOptions: {
-      ignored: ['**/node_modules', '**/target', '**/dist'],
-    },
+    // static: 'public', //default
+    //onAfterSetupMiddleware: _ => {},
   };
   const cfg = configure(opts, paths, output);
   console.log(JSON.stringify(cfg.output));
 
-  return isServing ? merge(cfg, devServer) : cfg; //return {...cfg, ...devServer};
+  return isServing ? <WebpackOptionsNormalized>{devServer, ...cfg} : cfg;
 }
