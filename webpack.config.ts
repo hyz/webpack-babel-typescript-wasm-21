@@ -5,16 +5,14 @@ import type {Configuration, WebpackOptionsNormalized} from 'webpack';
 import type * as DevServerTypes from 'webpack-dev-server';
 import configure from './configs/webpack';
 
-export default function (
-  env: unknown,
-  opts: {mode: 'production' | 'development'}
-): Configuration | WebpackOptionsNormalized {
+type WebpackConfiguration = Configuration | WebpackOptionsNormalized;
+export default function (env: unknown, {mode}: {mode: 'production' | 'development'}): WebpackConfiguration {
   //console.log(JSON.stringify(env), __filename);
-  process.env.NODE_ENV = opts.mode;
-  process.env.BABEL_ENV = opts.mode;
-  process.env.BROWSERSLIST_ENV = opts.mode;
+  process.env.NODE_ENV = mode;
+  process.env.BABEL_ENV = mode;
+  process.env.BROWSERSLIST_ENV = mode;
 
-  const isDev = opts.mode === 'development';
+  const isDev = mode === 'development';
   const isServing = isDev && process.argv.includes('serve');
 
   const paths = {
@@ -58,7 +56,8 @@ export default function (
     // static: 'public', //default
     //onAfterSetupMiddleware: _ => {},
   };
-  const cfg = configure(opts, paths, output);
+
+  const cfg = configure({mode}, paths, output);
   console.log(JSON.stringify(cfg.output));
 
   return isServing ? <WebpackOptionsNormalized>{devServer, ...cfg} : cfg;
