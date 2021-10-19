@@ -1,10 +1,10 @@
 {
-  "name": "ts-webgl-template",
+  "name": "typescript-rust-webpack-boilerplate",
   "version": "1.0.0",
-  "description": "Template for TypeScript & WebGL development.",
+  "description": "Template for TypeScript & rust development.",
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "main": "index.js",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "webpack serve --mode=development",
     "build": "webpack --mode=production",
@@ -18,23 +18,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tirondzo/ts-webgl-template.git"
+    "url": "git+https://github.com/hyz/...git"
   },
   "keywords": [
-    "ts",
     "typescript",
-    "webgl",
+    "react",
+    "rust",
+    "wasm",
     "webpack",
     "template",
+    "boilerplate",
     "starter",
     "unlicensed"
   ],
-  "author": "Tirondzo",
+  "author": "github:hyz",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/Tirondzo/ts-webgl-template/issues"
+    "url": "https://github.com/hyz/.../issues"
   },
-  "homepage": "https://github.com/Tirondzo/ts-webgl-template#readme",
+  "homepage": "https://github.com/hyz/...#readme",
   "devDependencies": {
     "@babel/cli": "^7.15.7",
     "@babel/core": "^7.15.5",

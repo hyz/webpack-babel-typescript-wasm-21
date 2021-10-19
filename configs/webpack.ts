@@ -1,7 +1,7 @@
 /* eslint-disable node/no-unpublished-require */
 /* eslint-disable node/no-unpublished-import */
-import * as webpack from 'webpack';
-import * as path from 'path';
+import type {Configuration, ResolveOptions, RuleSetUseItem} from 'webpack';
+import webpack from 'webpack';
 //import BundleAnalyzerPlugin from 'webpack-bundle-analyzer';
 import type {Manifest} from 'webpack-manifest-plugin';
 import {WebpackManifestPlugin} from 'webpack-manifest-plugin';
@@ -28,7 +28,6 @@ import {SubresourceIntegrityPlugin} from 'webpack-subresource-integrity';
 import CompressionPlugin from 'compression-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 
-import type * as DevServerTypes from 'webpack-dev-server';
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 //import ReactRefreshTypeScript from 'react-refresh-typescript';
 
@@ -36,10 +35,10 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 //import * as constants from './constants';
 
 interface Paths {
-  output: string;
+  entry: string;
+
   src: string;
   public: string;
-  index: string;
   indexHtmlTemplate: string;
   wasmCrate: string;
   wasmOutDir: string;
@@ -47,23 +46,21 @@ interface Paths {
   favicon: string;
 }
 type Options = {mode: 'production' | 'development'};
-type Configuration = webpack.Configuration | webpack.WebpackOptionsNormalized;
 
-export default function configure(paths: Paths, opts: Options): Configuration {
+type Output = NonNullable<Configuration['output']>;
+
+export default function configure(opts: Options, paths: Paths, output: Output): Configuration {
   console.log(JSON.stringify(paths));
   //console.log(JSON.stringify(options));
   //console.log(JSON.stringify(process.argv));
   //console.log(`typeof: ${typeof paths} ${typeof options}`);
 
   const isDev = opts.mode === 'development';
-  const isEnvProduction = opts.mode === 'production';
   //const isEnvProductionProfile = isEnvProduction && process.argv.includes('--profile');
   //const _config = env.prod ? configs.prod : env.test ? configs.test : configs.local;
+  const isProd = !isDev; //process.env.NODE_ENV === 'production';
 
-  const devServe = isDev && process.argv.includes('serve');
-  const isProduction = !isDev; //process.env.NODE_ENV === 'production';
-
-  //const babelLoader: webpack.RuleSetUseItem = {
+  //const babelLoader: RuleSetUseItem = {
   //  loader: 'babel-loader',
   //  options: {
   //    presets: ['@babel/env', '@babel/typescript', '@babel/react'],
@@ -97,7 +94,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
   //  },
   //});
 
-  const cssLoader = <webpack.RuleSetUseItem>{
+  const cssLoader = <RuleSetUseItem>{
     loader: 'css-loader',
     options: {
       sourceMap: isDev,
@@ -108,48 +105,31 @@ export default function configure(paths: Paths, opts: Options): Configuration {
     },
   };
 
-  const devServer /*:webpack.WebpackOptionsNormalized*/ = devServe
-    ? {
-        devServer: <DevServerTypes.Configuration>{
-          //contentBase: paths.output,
-          allowedHosts: 'all',
-          // host: '',
-          port: process.env.PORT || 8080,
-          compress: true,
-          liveReload: true,
-          hot: true,
-          watchFiles: ['./src/**', paths.output],
-          // static: '',
-        },
-        watchOptions: {
-          ignored: ['**/node_modules', '**/target', '**/dist'],
-        },
-      }
-    : {};
-
-  const config: webpack.Configuration = {
+  const config: Configuration = {
     mode: opts.mode, // isDev ? 'development' : 'production',
 
     // Can be extended with other entry points.
-    entry: [paths.index],
+    entry: [paths.entry],
     output: {
       clean: true,
       compareBeforeEmit: false,
-      path: paths.output,
-      publicPath: '/dist/', // : isJamstack? "/" : "/static/",
+      ...output,
+      // path: paths.output,
+      // //...constants.output,
+      // publicPath: '/dist/', // : isJamstack? "/" : "/static/",
 
-      // We want to hash filenames in production, so changed files
-      // would have a different name and won't be cached.
-      filename: isDev ? '[name].js' : '[name].[contenthash:8].js',
+      // // We want to hash filenames in production, so changed files
+      // // would have a different name and won't be cached.
+      // filename: isDev ? '[name].js' : '[name].[contenthash:8].js',
 
-      // Needed if we use code splitting.
-      chunkFilename: isDev ? '[name].js' : '[name].[contenthash:8].chunk.js',
+      // // Needed if we use code splitting.
+      // chunkFilename: isDev ? '[name].js' : '[name].[contenthash:8].chunk.js',
 
-      assetModuleFilename: 'assets/[hash][ext][query]',
-      //webassemblyModuleFilename: '[hash:8].wasm',
-      // library: '',
-      // libraryTarget: 'es5',
-      crossOriginLoading: 'anonymous',
+      // assetModuleFilename: 'assets/[hash][ext][query]',
+      // //webassemblyModuleFilename: '[hash:8].wasm',
+      // // library: '',
+      // // libraryTarget: 'es5',
+      // crossOriginLoading: 'anonymous',
     },
 
     // Fail out on the first error instead of tolerating it.
@@ -159,7 +139,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
     devtool: isDev ? 'cheap-module-source-map' : 'source-map',
 
     optimization: {
-      minimize: isProduction,
+      minimize: isProd,
       minimizer: [new HtmlMinimizerPlugin(), new CssMinimizerPlugin.default(), new TerserPlugin()],
       //chunkIds: 'deterministic', // To keep filename consistent between different modes (for example building only)
       //splitChunks: {chunks: 'all'},
@@ -234,11 +214,11 @@ export default function configure(paths: Paths, opts: Options): Configuration {
           type: 'asset',
           //exclude: /node_modules/,
           //use: [
-          //  <webpack.RuleSetUseItem>{
+          //  <RuleSetUseItem>{
           //    loader: 'svg-url-loader',
           //    options: {limit: 10 * 1024, noquotes: true},
           //  },
-          //  <webpack.RuleSetUseItem>{
+          //  <RuleSetUseItem>{
           //    loader: 'svgo-loader',
           //    options: {
           //      plugins: [{removeTitle: true}, {mergePaths: true}],
@@ -250,12 +230,12 @@ export default function configure(paths: Paths, opts: Options): Configuration {
         {
           test: /\.(glsl|vert|frag)$/,
           exclude: /node_modules/,
-          use: <webpack.RuleSetUseItem>{
+          use: <RuleSetUseItem>{
             loader: 'webpack-glsl-minify',
             options: {
               // Don't obfuscate shader code in dev mode
-              disableMangle: !isProduction,
-              preserveAll: !isProduction,
+              disableMangle: !isProd,
+              preserveAll: !isProd,
               esModule: true,
             },
           },
@@ -290,7 +270,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
         patterns: [
           {
             from: paths.public,
-            to: paths.output,
+            to: output.path,
             globOptions: {ignore: ['**/index.html']},
             noErrorOnMissing: true,
           },
@@ -307,7 +287,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
         templateParameters: {
           PUBLIC_URL: paths.public, // test, nonsense
         },
-        minify: isProduction
+        minify: isProd
           ? {
               removeComments: true,
               collapseWhitespace: true,
@@ -343,7 +323,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
       // Updates modules while an application is running, without a full reload.
       //isDev && new webpack.HotModuleReplacementPlugin(),
 
-      isProduction &&
+      isProd &&
         new CompressionPlugin({
           test: /\.(js|css|html|ttf|svg|woff|woff2|eot)$/,
           //!!! filename: '[path].br[query]', //! Conflict: Multiple assets
@@ -352,14 +332,14 @@ export default function configure(paths: Paths, opts: Options): Configuration {
           compressionOptions: {level: 9},
         }),
 
-      isProduction &&
+      isProd &&
         new MiniCssExtractPlugin.default({
           filename: '[name].[contenthash].css',
           chunkFilename: '[id].[contenthash].css',
           ignoreOrder: true,
         }),
 
-      isProduction && new SubresourceIntegrityPlugin(),
+      isProd && new SubresourceIntegrityPlugin(),
     ].filter(Boolean),
 
     resolve: {
@@ -367,7 +347,7 @@ export default function configure(paths: Paths, opts: Options): Configuration {
       //alias: tsconfig.compilerOptions.paths as {[index: string]: string[]};
       alias: {}, // {src: (paths.src), assets: (paths.assets)},
       plugins: [new TsconfigPathsPlugin()],
-    } as webpack.ResolveOptions,
+    } as ResolveOptions,
   };
 
   //import('../tsconfig.json').then(tsconfig => {
@@ -377,8 +357,8 @@ export default function configure(paths: Paths, opts: Options): Configuration {
   //console.log(`config.resolve: ${JSON.stringify(config.resolve)}`);
 
   //console.log(JSON.stringify(config.output));
-  return {...devServer, ...config};
+  return config; //{...devServer, ...config};
 }
 
-//function configure(env: any, options: any): webpack.Configuration | {devServer?: devServer.Configuration} { return config; }
-//export default function (env: any, options: any) /*: webpack.Configuration & typeof dev*/ { return {...dev, ...configure(env, options)}; }
+//function configure(env: any, options: any): Configuration | {devServer?: devServer.Configuration} { return config; }
+//export default function (env: any, options: any) /*: Configuration & typeof dev*/ { return {...dev, ...configure(env, options)}; }

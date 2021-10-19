@@ -6,3 +6,6 @@ dist/
 
 # Ignore shaders
 src/shaders/
+
+target/
+crates/
