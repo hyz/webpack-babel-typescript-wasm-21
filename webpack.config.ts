@@ -6,7 +6,7 @@ import type * as DevServerTypes from 'webpack-dev-server';
 import type {Paths} from './configs/webpack';
 import {configure} from './configs/webpack';
 
-type ReturnType = Configuration | WebpackOptionsNormalized;
+type ReturnType = Configuration; // | WebpackOptionsNormalized;
 export default function (env: unknown, {mode}: {mode: 'production' | 'development'}): ReturnType[] {
   //console.log(JSON.stringify(env), __filename);
   process.env.NODE_ENV = mode;
@@ -71,7 +71,8 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
   //const preload: Configuration = {...cfg, entry: {preload: './main/preload'}, target: 'electron-preload'};
   //const main: Configuration = {...cfg, entry: {index: './main/index'}, target: 'electron-main'};
 
-  return [isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
+  return [renderer];
+  //return [isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
   //return [main, preload, isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
   //return [isServing ? <WebpackOptionsNormalized>{devServer, ...renderer} : renderer];
 } // init
