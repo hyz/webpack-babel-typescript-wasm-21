@@ -1,6 +1,6 @@
 /* eslint-disable node/no-unpublished-require */
 /* eslint-disable node/no-unpublished-import */
-import type {Configuration, ResolveOptions, RuleSetUseItem} from 'webpack';
+import type {Configuration, EntryObject, ResolveOptions, RuleSetUseItem} from 'webpack';
 import webpack from 'webpack';
 //import BundleAnalyzerPlugin from 'webpack-bundle-analyzer';
 import type {Manifest} from 'webpack-manifest-plugin';
@@ -12,7 +12,7 @@ import {CleanWebpackPlugin} from 'clean-webpack-plugin'; // tree shaking
 import CopyPlugin from 'copy-webpack-plugin';
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
-import * as HtmlWebpackPlugin from 'html-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 const HtmlMinimizerPlugin = require('html-minimizer-webpack-plugin');
 //import HtmlMinimizerPlugin from 'html-minimizer-webpack-plugin';
 const InlineChunkHtmlPlugin = require('inline-chunk-html-plugin');
@@ -20,8 +20,8 @@ const InlineChunkHtmlPlugin = require('inline-chunk-html-plugin');
 
 const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer'); // help tailwindcss to work
-import * as CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
-import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 //const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 import {SubresourceIntegrityPlugin} from 'webpack-subresource-integrity';
 
@@ -34,10 +34,11 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 //require('@babel/register')({extensions: ['.ts'], cache: false});
 //import * as constants from './constants';
 
-interface Paths {
-  entry: string;
+export interface Paths {
+  basedir: string;
+  //entry: string;
 
-  src: string;
+  //src: string;
   public: string;
   indexHtmlTemplate: string;
   wasmCrate: string;
@@ -45,11 +46,11 @@ interface Paths {
   assets: string;
   favicon: string;
 }
-type Options = {mode: 'production' | 'development'};
+export type Options = {mode: 'production' | 'development'};
+export type Output = NonNullable<Configuration['output']>;
 
-type Output = NonNullable<Configuration['output']>;
-
-export default function configure(opts: Options, paths: Paths, output: Output): Configuration {
+export function configure(output: Output, paths: Paths, opts: Options): Configuration {
+  //, entry: EntryObject
   console.log(JSON.stringify(paths));
   //console.log(JSON.stringify(options));
   //console.log(JSON.stringify(process.argv));
@@ -107,11 +108,12 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
 
   const config: Configuration = {
     mode: opts.mode, // isDev ? 'development' : 'production',
+    //node: {global: false, __dirname: false, __filename: false},
 
     // Can be extended with other entry points.
-    entry: [paths.entry],
+    //entry,
     output: {
-      clean: true,
+      //clean: true,
       compareBeforeEmit: false,
       ...output,
       // path: paths.output,
@@ -134,13 +136,12 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
 
     // Fail out on the first error instead of tolerating it.
     bail: !isDev,
-
     // This option controls if and how source maps are generated.
-    devtool: isDev ? 'cheap-module-source-map' : 'source-map',
+    devtool: isDev ? 'eval' : false,
 
     optimization: {
       minimize: isProd,
-      minimizer: [new HtmlMinimizerPlugin(), new CssMinimizerPlugin.default(), new TerserPlugin()],
+      minimizer: [new HtmlMinimizerPlugin(), new CssMinimizerPlugin(), new TerserPlugin()],
       //chunkIds: 'deterministic', // To keep filename consistent between different modes (for example building only)
       //splitChunks: {chunks: 'all'},
       //runtimeChunk: {name: (entrypoint: any) => `runtime-${entrypoint.name}`},
@@ -164,7 +165,7 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
         //  test: /\.wasm$/,  type: 'webassembly/sync',
         //},
         {
-          test: /\.(js|cjs|mjs|jsx|ts|tsx)$/,
+          test: /\.(js|ts|jsx|tsx|cjs|mjs)$/,
           exclude: /node_modules/,
           loader: 'babel-loader', //['babel-loader', 'ts-loader'],
           //options: {rootMode: 'upward'},
@@ -273,15 +274,13 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
       }),
 
       // Add scripts to the final HTML
-      new HtmlWebpackPlugin.default({
+      new HtmlWebpackPlugin({
         inject: true,
         template: `html-loader!${paths.indexHtmlTemplate}`,
         filename: 'index.html',
         favicon: paths.favicon,
-        title: 'Hello',
-        templateParameters: {
-          PUBLIC_URL: paths.public, // test, nonsense
-        },
+        // title: 'Hello',
+        //templateParameters: { PUBLIC_URL: paths.public, }, // test, nonsense
         minify: isProd
           ? {
               removeComments: true,
@@ -297,7 +296,7 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
             }
           : undefined,
       }),
-      !isDev && new CleanWebpackPlugin(),
+      //!isDev && new CleanWebpackPlugin(),
       !isDev && new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime-.+[.]js/]),
 
       // Generate a manifest file which contains a mapping of all asset filenames
@@ -320,7 +319,7 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
 
       isProd &&
         new CompressionPlugin({
-          test: /\.(js|css|html|ttf|svg|woff|woff2|eot)$/,
+          test: /\.(js|css|html|ttf|svg|woff|woff2|eot|json)$/,
           //!!! filename: '[path].br[query]', //! Conflict: Multiple assets
           //filename: '[path][base].br', // * @default '[path][base].gz'
           //algorithm: 'brotliCompress', // default gzip
@@ -328,7 +327,7 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
         }),
 
       isProd &&
-        new MiniCssExtractPlugin.default({
+        new MiniCssExtractPlugin({
           filename: '[name].[contenthash].css',
           chunkFilename: '[id].[contenthash].css',
           ignoreOrder: true,

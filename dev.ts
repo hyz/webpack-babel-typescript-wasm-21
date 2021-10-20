@@ -1,20 +1,25 @@
+/* eslint-disable node/no-unpublished-import */
+
 import * as path from 'path';
 //import merge from 'webpack-merge';
 
 import type {Configuration, WebpackOptionsNormalized, EntryObject} from 'webpack';
 import type * as DevServerTypes from 'webpack-dev-server';
+import WebpackDevServer from 'webpack-dev-server';
+import Webpack from 'webpack';
+
 import type {Paths} from './configs/webpack';
 import {configure} from './configs/webpack';
 
-type ReturnType = Configuration | WebpackOptionsNormalized;
-export default function (env: unknown, {mode}: {mode: 'production' | 'development'}): ReturnType[] {
+type ReturnType = WebpackDevServer; //Configuration | WebpackOptionsNormalized;
+function init(env: unknown, {mode}: {mode: 'production' | 'development'}): ReturnType {
   //console.log(JSON.stringify(env), __filename);
   process.env.NODE_ENV = mode;
   process.env.BABEL_ENV = mode;
   process.env.BROWSERSLIST_ENV = mode;
 
-  const isDev = mode === 'development';
-  const isServing = isDev && process.argv.includes('serve');
+  //const isDev = mode === 'development';
+  //const isServing = isDev && process.argv.includes('serve');
 
   const paths: Paths = {
     basedir: __dirname,
@@ -66,12 +71,22 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
   cfg.node = {__dirname: false, __filename: false}; //global: false,
   // console.log(JSON.stringify(cfg.output));
   // output: {...cfg.output, filename: isDev ? '[name].js' : '[name].[contenthash:8].js'},
-  //const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}, target: 'electron-renderer'};
-  const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}};
   //const preload: Configuration = {...cfg, entry: {preload: './main/preload'}, target: 'electron-preload'};
   //const main: Configuration = {...cfg, entry: {index: './main/index'}, target: 'electron-main'};
+  //const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}, target: 'electron-renderer'};
+  const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}};
 
-  return [isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
   //return [main, preload, isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
   //return [isServing ? <WebpackOptionsNormalized>{devServer, ...renderer} : renderer];
+
+  //const compiler = Webpack([main, preload, renderer]);
+  const compiler = Webpack([renderer]);
+  //!const devServerOptions = {...cfg, ...devServer, open: true};
+  const server = new WebpackDevServer(devServer, compiler);
+  return server;
 } // init
+
+const server = init({}, {mode: 'development'});
+server.startCallback(() => {
+  console.log('Starting server on http://localhost:8080');
+});

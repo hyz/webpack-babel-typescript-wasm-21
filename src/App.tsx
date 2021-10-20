@@ -28,12 +28,12 @@ import icon from '~/assets/icon.svg';
 const Hello = () => {
   return (
     <div>
-        <Greet />
+      <Greet />
       <div className="Hello">
         <img width="200px" alt="icon" src={icon} />
       </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="text-blue-500">TailwindCSS setup</div>
+      <h1>webpack react boilerplate</h1>
+      <div className="text-blue-500">TailwindCSS setup. text-blue-500</div>
       <div className="Hello">
         <a href="https://electron-react-boilerplate.js.org/" target="_blank" rel="noreferrer">
           <button type="button">
