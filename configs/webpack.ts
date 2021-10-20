@@ -184,12 +184,7 @@ export default function configure(opts: Options, paths: Paths, output: Output): 
             'sass-loader',
             {
               loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  ident: 'postcss',
-                  plugins: [tailwindcss, autoprefixer],
-                },
-              },
+              //options: { postcssOptions: { ident: 'postcss', plugins: [tailwindcss, autoprefixer], }, },
             },
           ],
         },
