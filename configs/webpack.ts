@@ -34,24 +34,35 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 //require('@babel/register')({extensions: ['.ts'], cache: false});
 //import * as constants from './constants';
 
-export interface Paths {
-  basedir: string;
+export interface WasmPackPluginOptions {
+  crateDirectory: string;
+  args?: string;
+  extraArgs?: string;
+  forceWatch?: boolean;
+  forceMode?: 'development' | 'production';
+  outDir?: string;
+  outName?: string;
+  watchDirectories?: string[];
+  /** Controls plugin output verbosity. Defaults to 'info'. */
+  pluginLogLevel?: 'info' | 'error';
+}
+export interface CustomConfigs {
+  //basedir: string;
   //entry: string;
 
   //src: string;
-  public: string;
-  indexHtmlTemplate: string;
-  wasmCrate: string;
-  wasmOutDir: string;
-  assets: string;
-  favicon: string;
+  //public: string;
+  //assets: string;
+
+  htmlWebpackPluginOptions: HtmlWebpackPlugin.Options;
+  wasmPackPluginOptions: WasmPackPluginOptions; // wasmCrate: string; wasmOutDir: string;
 }
 export type Options = {mode: 'production' | 'development'};
 export type Output = NonNullable<Configuration['output']>;
 
-export function configure(output: Output, paths: Paths, opts: Options): Configuration {
+export function configure(output: Output, cfgs: CustomConfigs, opts: Options): Configuration {
   //, entry: EntryObject
-  console.log(JSON.stringify(paths));
+  console.log(JSON.stringify(cfgs));
   //console.log(JSON.stringify(options));
   //console.log(JSON.stringify(process.argv));
   //console.log(`typeof: ${typeof paths} ${typeof options}`);
@@ -254,31 +265,29 @@ export function configure(output: Output, paths: Paths, opts: Options): Configur
       !isDev && new webpack.ProgressPlugin(),
 
       new WasmPackPlugin({
-        crateDirectory: paths.wasmCrate, //__dirname,
-        outDir: paths.wasmOutDir, //'../pkg',
+        //crateDirectory: paths.wasmCrate, //__dirname,
+        //outDir: paths.wasmOutDir, //'../pkg',
         outName: 'index',
         extraArgs: '--target web', //'--target web --mode normal',
         forceMode: opts.mode,
+        ...cfgs.wasmPackPluginOptions,
       }),
 
-      // Copy content to the output directory without processing it.
-      new CopyPlugin({
-        patterns: [
-          {
-            from: paths.public,
-            to: output.path,
-            globOptions: {ignore: ['**/index.html']},
-            noErrorOnMissing: true,
-          },
-        ],
-      }),
+      // // Copy content to the output directory without processing it.
+      // new CopyPlugin({
+      //   patterns: [
+      //     {
+      //       from: cfgs.public,
+      //       to: output.path,
+      //       globOptions: {ignore: ['**/index.html']},
+      //       noErrorOnMissing: true,
+      //     },
+      //   ],
+      // }),
 
       // Add scripts to the final HTML
       new HtmlWebpackPlugin({
         inject: true,
-        template: `html-loader!${paths.indexHtmlTemplate}`,
-        filename: 'index.html',
-        favicon: paths.favicon,
         // title: 'Hello',
         //templateParameters: { PUBLIC_URL: paths.public, }, // test, nonsense
         minify: isProd
@@ -295,6 +304,10 @@ export function configure(output: Output, paths: Paths, opts: Options): Configur
               minifyURLs: true,
             }
           : undefined,
+        ...cfgs.htmlWebpackPluginOptions,
+        //template: `html-loader!${paths.indexHtmlTemplate}`,
+        //filename: 'index.html',
+        //favicon: paths.favicon,
       }),
       //!isDev && new CleanWebpackPlugin(),
       !isDev && new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime-.+[.]js/]),

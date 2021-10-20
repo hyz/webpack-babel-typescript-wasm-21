@@ -3,30 +3,32 @@ import * as path from 'path';
 
 import type {Configuration, WebpackOptionsNormalized, EntryObject} from 'webpack';
 import type * as DevServerTypes from 'webpack-dev-server';
-import type {Paths} from './configs/webpack';
+import type {CustomConfigs} from './configs/webpack';
 import {configure} from './configs/webpack';
 
-type ReturnType = Configuration; // | WebpackOptionsNormalized;
-export default function (env: unknown, {mode}: {mode: 'production' | 'development'}): ReturnType[] {
+export default function (env: unknown, {mode}: {mode: 'production' | 'development'}): Configuration[] {
   //console.log(JSON.stringify(env), __filename);
   process.env.NODE_ENV = mode;
   process.env.BABEL_ENV = mode;
   process.env.BROWSERSLIST_ENV = mode;
+  // const isDev = mode === 'development';
 
-  const isDev = mode === 'development';
-  const isServing = isDev && process.argv.includes('serve');
+  const cfgs: CustomConfigs = {
+    //basedir: __dirname,
+    //public: './public',
+    //assets: './assets',
 
-  const paths: Paths = {
-    basedir: __dirname,
-    // entry: {index: './src/index.tsx'},
-
-    //src: './src',
-    public: './public',
-    indexHtmlTemplate: path.resolve('./public', 'index.html'),
-    wasmCrate: path.join(__dirname, 'crates'),
-    wasmOutDir: path.join(__dirname, 'src/api/pkg'),
-    assets: './assets',
-    favicon: './public/favicon.ico',
+    htmlWebpackPluginOptions: {
+      template: `html-loader!${path.resolve('./public', 'index.html')}`,
+      favicon: './public/favicon.ico',
+      filename: 'index.html',
+    },
+    wasmPackPluginOptions: {
+      crateDirectory: path.join(__dirname, 'crates'),
+      outDir: path.join(__dirname, 'src/api/pkg'),
+      outName: 'index',
+      extraArgs: '--target web', //'--target web --mode normal',
+    },
   };
 
   //const entry: EntryObject = { index: './main/index', preload: './main/preload', renderer: './src/index.tsx', };
@@ -44,25 +46,26 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
     crossOriginLoading: 'anonymous',
   };
 
-  const devServer: DevServerTypes.Configuration = {
-    //contentBase: paths.output,
-    allowedHosts: 'all',
-    // host: '',
-    port: process.env.PORT || 'auto',
-    //compress: true,
-    hot: true,
-    //liveReload: true,
-    //watchFiles: <DevServerTypes.WatchFiles>{
-    //  paths: ['./src/**', './main/**', output.path],
-    //  options: {
-    //    ignored: ['**/node_modules', '**/target', '**/dist'],
-    //  },
-    //},
-    // static: 'public', //default
-    //onAfterSetupMiddleware: _ => {},
-  };
+  //  const isServing = isDev && process.argv.includes('serve');
+  //  const devServer: DevServerTypes.Configuration = {
+  //    //contentBase: paths.output,
+  //    allowedHosts: 'all',
+  //    // host: '',
+  //    port: process.env.PORT || 'auto',
+  //    //compress: true,
+  //    hot: true,
+  //    //liveReload: true,
+  //    //watchFiles: <DevServerTypes.WatchFiles>{
+  //    //  paths: ['./src/**', './main/**', output.path],
+  //    //  options: {
+  //    //    ignored: ['**/node_modules', '**/target', '**/dist'],
+  //    //  },
+  //    //},
+  //    // static: 'public', //default
+  //    //onAfterSetupMiddleware: _ => {},
+  //  };
 
-  const cfg = configure(output, paths, {mode});
+  const cfg = configure(output, cfgs, {mode});
   cfg.node = {__dirname: false, __filename: false}; //global: false,
   // console.log(JSON.stringify(cfg.output));
   // output: {...cfg.output, filename: isDev ? '[name].js' : '[name].[contenthash:8].js'},
@@ -70,6 +73,19 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
   const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}};
   //const preload: Configuration = {...cfg, entry: {preload: './main/preload'}, target: 'electron-preload'};
   //const main: Configuration = {...cfg, entry: {index: './main/index'}, target: 'electron-main'};
+
+  //cfg.plugins .push (
+  //  // new CopyPlugin({
+  //  //   patterns: [
+  //  //     {
+  //  //       from: cfgs.public,
+  //  //       to: output.path,
+  //  //       globOptions: {ignore: ['**/index.html']},
+  //  //       noErrorOnMissing: true,
+  //  //     },
+  //  //   ],
+  //  // }),
+  //  );
 
   return [renderer];
   //return [isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
