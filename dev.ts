@@ -2,6 +2,7 @@
 
 import * as path from 'path';
 //import merge from 'webpack-merge';
+import {ChildProcess} from 'child_process';
 
 import type {Configuration, WebpackOptionsNormalized, EntryObject} from 'webpack';
 import type * as DevServerTypes from 'webpack-dev-server';
@@ -64,7 +65,15 @@ function init(env: unknown, {mode}: {mode: 'production' | 'development'}): Retur
     //  },
     //},
     // static: 'public', //default
-    //onAfterSetupMiddleware: _ => {},
+    ///////////////
+    // onAfterSetupMiddleware(_a) { console.log('||onAfterSetupMiddleware:', _a); },
+    onListening(devServer) {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined');
+      }
+      const addr = devServer.server.address();
+      console.log('||Listening on port:', addr);
+    },
   };
 
   const cfg = configure(output, paths, {mode});
@@ -80,7 +89,11 @@ function init(env: unknown, {mode}: {mode: 'production' | 'development'}): Retur
   //return [isServing ? <WebpackOptionsNormalized>{devServer, ...renderer} : renderer];
 
   //const compiler = Webpack([main, preload, renderer]);
-  const compiler = Webpack([renderer]);
+  const compiler = Webpack([renderer] /*, (err, stats) => { console.log('||Webpack run & callback: ', err, stats); }*/);
+  compiler.hooks.done.tap('Compile Done', params => {
+    console.log('||Done:', params);
+  });
+
   //!const devServerOptions = {...cfg, ...devServer, open: true};
   const server = new WebpackDevServer(devServer, compiler);
   return server;
@@ -88,5 +101,5 @@ function init(env: unknown, {mode}: {mode: 'production' | 'development'}): Retur
 
 const server = init({}, {mode: 'development'});
 server.startCallback(() => {
-  console.log('Starting server on http://localhost:8080');
+  console.log('||startCallback');
 });
