@@ -1,8 +1,9 @@
+import {CleanWebpackPlugin} from 'clean-webpack-plugin';
 import * as path from 'path';
 //import merge from 'webpack-merge';
 
-import type {Configuration, WebpackOptionsNormalized, EntryObject} from 'webpack';
-import type * as DevServerTypes from 'webpack-dev-server';
+import type {Configuration, EntryObject} from 'webpack';
+import {SubresourceIntegrityPlugin} from 'webpack-subresource-integrity';
 import type {CustomConfigs} from './configs/webpack';
 import {configure} from './configs/webpack';
 
@@ -11,7 +12,8 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
   process.env.NODE_ENV = mode;
   process.env.BABEL_ENV = mode;
   process.env.BROWSERSLIST_ENV = mode;
-  // const isDev = mode === 'development';
+  const isDev = mode === 'development';
+  // const isProd = mode === 'production';
 
   const cfgs: CustomConfigs = {
     //basedir: __dirname,
@@ -19,9 +21,11 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
     //assets: './assets',
 
     htmlWebpackPluginOptions: {
+      title: 'Hello world.',
       template: `html-loader!${path.resolve('./public', 'index.html')}`,
       favicon: './public/favicon.ico',
       filename: 'index.html',
+      //templateParameters: { PUBLIC_URL: paths.public, }, // test, nonsense
     },
     wasmPackPluginOptions: {
       crateDirectory: path.join(__dirname, 'crates'),
@@ -29,7 +33,9 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
       outName: 'index',
       extraArgs: '--target web', //'--target web --mode normal',
     },
+    plugins: [new CleanWebpackPlugin()],
   };
+  isDev || cfgs.plugins.push(new SubresourceIntegrityPlugin());
 
   //const entry: EntryObject = { index: './main/index', preload: './main/preload', renderer: './src/index.tsx', };
 
@@ -46,27 +52,9 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
     crossOriginLoading: 'anonymous',
   };
 
-  //  const isServing = isDev && process.argv.includes('serve');
-  //  const devServer: DevServerTypes.Configuration = {
-  //    //contentBase: paths.output,
-  //    allowedHosts: 'all',
-  //    // host: '',
-  //    port: process.env.PORT || 'auto',
-  //    //compress: true,
-  //    hot: true,
-  //    //liveReload: true,
-  //    //watchFiles: <DevServerTypes.WatchFiles>{
-  //    //  paths: ['./src/**', './main/**', output.path],
-  //    //  options: {
-  //    //    ignored: ['**/node_modules', '**/target', '**/dist'],
-  //    //  },
-  //    //},
-  //    // static: 'public', //default
-  //    //onAfterSetupMiddleware: _ => {},
-  //  };
-
   const cfg = configure(output, cfgs, {mode});
   cfg.node = {__dirname: false, __filename: false}; //global: false,
+
   // console.log(JSON.stringify(cfg.output));
   // output: {...cfg.output, filename: isDev ? '[name].js' : '[name].[contenthash:8].js'},
   //const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}, target: 'electron-renderer'};

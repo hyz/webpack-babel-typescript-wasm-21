@@ -23,7 +23,6 @@ const autoprefixer = require('autoprefixer'); // help tailwindcss to work
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 //const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-import {SubresourceIntegrityPlugin} from 'webpack-subresource-integrity';
 
 import CompressionPlugin from 'compression-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -48,14 +47,11 @@ export interface WasmPackPluginOptions {
 }
 export interface CustomConfigs {
   //basedir: string;
-  //entry: string;
-
-  //src: string;
   //public: string;
   //assets: string;
-
   htmlWebpackPluginOptions: HtmlWebpackPlugin.Options;
   wasmPackPluginOptions: WasmPackPluginOptions; // wasmCrate: string; wasmOutDir: string;
+  plugins: webpack.WebpackPluginInstance[];
 }
 export type Options = {mode: 'production' | 'development'};
 export type Output = NonNullable<Configuration['output']>;
@@ -63,9 +59,7 @@ export type Output = NonNullable<Configuration['output']>;
 export function configure(output: Output, cfgs: CustomConfigs, opts: Options): Configuration {
   //, entry: EntryObject
   console.log(JSON.stringify(cfgs));
-  //console.log(JSON.stringify(options));
   //console.log(JSON.stringify(process.argv));
-  //console.log(`typeof: ${typeof paths} ${typeof options}`);
 
   const isDev = opts.mode === 'development';
   //const isEnvProductionProfile = isEnvProduction && process.argv.includes('--profile');
@@ -112,7 +106,7 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
       sourceMap: isDev,
       modules: {
         auto: true,
-        localIdentName: isDev ? '[name]__[local]_[contenthash:8]' : '[hash:base64]',
+        localIdentName: isDev ? '[name]_[local]_[contenthash:8]' : '[hash:base64]',
       },
     },
   };
@@ -121,28 +115,17 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
     mode: opts.mode, // isDev ? 'development' : 'production',
     //node: {global: false, __dirname: false, __filename: false},
 
-    // Can be extended with other entry points.
-    //entry,
     output: {
       //clean: true,
       compareBeforeEmit: false,
-      ...output,
-      // path: paths.output,
-      // //...constants.output,
-      // publicPath: '/dist/', // : isJamstack? "/" : "/static/",
-
-      // // We want to hash filenames in production, so changed files
-      // // would have a different name and won't be cached.
       // filename: isDev ? '[name].js' : '[name].[contenthash:8].js',
-
-      // // Needed if we use code splitting.
       // chunkFilename: isDev ? '[name].js' : '[name].[contenthash:8].chunk.js',
-
       // assetModuleFilename: 'assets/[hash][ext][query]',
       // //webassemblyModuleFilename: '[hash:8].wasm',
       // // library: '',
       // // libraryTarget: 'es5',
       // crossOriginLoading: 'anonymous',
+      ...output,
     },
 
     // Fail out on the first error instead of tolerating it.
@@ -160,12 +143,11 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
     },
 
     module: {
-      // Makes missing exports an error instead of warning.
       strictExportPresence: true,
 
       rules: [
         {
-          exclude: /(\.d\.ts)$/, // Ignore Declaration typescript files.
+          exclude: /(\.d\.ts)$/,
         },
         {
           test: /\.worker\.[tj]s$/,
@@ -251,12 +233,12 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
         //{test: /\.(py|js|ts|rs)$/, exclude: /(src|configs)/, type: 'asset/source'},
       ],
     },
-    experiments: {
-      //syncWebAssembly: true,
-      //asyncWebAssembly: true,
-      //topLevelAwait: true,
-      //importAwait: true,
-    },
+    //experiments: {
+    //  //syncWebAssembly: true,
+    //  //asyncWebAssembly: true,
+    //  //topLevelAwait: true,
+    //  //importAwait: true,
+    //},
 
     plugins: [
       // Pass environment variables that are used in the code.
@@ -266,7 +248,6 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
 
       new WasmPackPlugin({
         //crateDirectory: paths.wasmCrate, //__dirname,
-        //outDir: paths.wasmOutDir, //'../pkg',
         outName: 'index',
         extraArgs: '--target web', //'--target web --mode normal',
         forceMode: opts.mode,
@@ -288,8 +269,6 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
       // Add scripts to the final HTML
       new HtmlWebpackPlugin({
         inject: true,
-        // title: 'Hello',
-        //templateParameters: { PUBLIC_URL: paths.public, }, // test, nonsense
         minify: isProd
           ? {
               removeComments: true,
@@ -309,7 +288,6 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
         //filename: 'index.html',
         //favicon: paths.favicon,
       }),
-      //!isDev && new CleanWebpackPlugin(),
       !isDev && new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime-.+[.]js/]),
 
       // Generate a manifest file which contains a mapping of all asset filenames
@@ -346,7 +324,7 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
           ignoreOrder: true,
         }),
 
-      isProd && new SubresourceIntegrityPlugin(),
+      ...cfgs.plugins,
     ].filter(Boolean),
 
     resolve: {
