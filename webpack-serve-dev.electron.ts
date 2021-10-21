@@ -1,3 +1,4 @@
+/* eslint-disable node/no-unpublished-require */
 /* eslint-disable node/no-unpublished-import */
 import * as path from 'path';
 
@@ -7,13 +8,12 @@ import WebpackDevServer from 'webpack-dev-server';
 import Webpack from 'webpack';
 
 import configure from './webpack.config';
-/* /// electron
+
 import {spawn} from 'child_process';
 //import electron from 'electron';
 const electron = require('electron');
 
 const index = './main'; // ./dist
-*/
 
 (function dev() {
   const devServer: DevServerTypes.Configuration = {
@@ -51,7 +51,6 @@ const index = './main'; // ./dist
     console.log('||Done:', doneCount, params);
     doneCount += 1;
     if (doneCount > 1) return;
-    /* /// electron
     spawn(electron, [index], {stdio: 'inherit'}).on('close', () => {
       server.stopCallback(() => {
         console.log('||WebpackDevServer.stopCallback');
@@ -59,7 +58,6 @@ const index = './main'; // ./dist
         process.exit(0);
       });
     });
-    */
   });
   server.startCallback(() => {
     console.log('||WebpackDevServer.startCallback');

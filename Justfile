@@ -6,6 +6,12 @@ usage:
 	basic-http-server .
 	echo "open http://4000.local/dist"
 
+webpack name mode='production':
+	yarn webpack build --mode {{mode}} --config-name {{name}}
+
+clean name='dist':
+	yarn rimraf {{name}}
+
 default:
 	yarn info webpack
 
@@ -75,4 +81,5 @@ esbuild:
 
 windows-wasm-pack:
 	cargo install wasm-pack --no-default-features
+
 

@@ -112,8 +112,8 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
   };
 
   const config: Configuration = {
-    mode: opts.mode, // isDev ? 'development' : 'production',
-    //node: {global: false, __dirname: false, __filename: false},
+    mode: opts.mode,
+    node: {global: false, __dirname: false, __filename: false},
 
     output: {
       //clean: true,
@@ -131,7 +131,7 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
     // Fail out on the first error instead of tolerating it.
     bail: !isDev,
     // This option controls if and how source maps are generated.
-    devtool: isDev ? 'eval' : false,
+    devtool: isDev ? 'eval-source-map' : 'source-map',
 
     optimization: {
       minimize: isProd,

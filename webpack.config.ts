@@ -38,6 +38,18 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
   isDev || cfgs.plugins.push(new SubresourceIntegrityPlugin());
 
   //const entry: EntryObject = { index: './main/index', preload: './main/preload', renderer: './src/index.tsx', };
+  //cfgs.plugins .push (
+  //  // new CopyPlugin({
+  //  //   patterns: [
+  //  //     {
+  //  //       from: cfgs.public,
+  //  //       to: output.path,
+  //  //       globOptions: {ignore: ['**/index.html']},
+  //  //       noErrorOnMissing: true,
+  //  //     },
+  //  //   ],
+  //  // }),
+  //  );
 
   const output: Configuration['output'] = {
     clean: {dry: true, keep: _ => true}, //CleanOptions
@@ -52,31 +64,13 @@ export default function (env: unknown, {mode}: {mode: 'production' | 'developmen
     crossOriginLoading: 'anonymous',
   };
 
-  const cfg = configure(output, cfgs, {mode});
-  cfg.node = {__dirname: false, __filename: false}; //global: false,
+  const cf = configure(output, cfgs, {mode});
+  // console.log(JSON.stringify(cf.output));
 
-  // console.log(JSON.stringify(cfg.output));
-  // output: {...cfg.output, filename: isDev ? '[name].js' : '[name].[contenthash:8].js'},
-  //const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}, target: 'electron-renderer'};
-  const renderer: Configuration = {...cfg, entry: {bundle: './src/index'}};
-  //const preload: Configuration = {...cfg, entry: {preload: './main/preload'}, target: 'electron-preload'};
-  //const main: Configuration = {...cfg, entry: {index: './main/index'}, target: 'electron-main'};
-
-  //cfg.plugins .push (
-  //  // new CopyPlugin({
-  //  //   patterns: [
-  //  //     {
-  //  //       from: cfgs.public,
-  //  //       to: output.path,
-  //  //       globOptions: {ignore: ['**/index.html']},
-  //  //       noErrorOnMissing: true,
-  //  //     },
-  //  //   ],
-  //  // }),
-  //  );
-
-  return [renderer];
-  //return [isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
-  //return [main, preload, isServing ? <WebpackOptionsNormalized>{...renderer, devServer} : renderer];
-  //return [isServing ? <WebpackOptionsNormalized>{devServer, ...renderer} : renderer];
-} // init
+  const renderer = {name: 'renderer', entry: './src/index'/*, target: 'electron-renderer'*/};
+  //const preload = {name: 'preload', entry: {preload: './main/preload'}, target: 'electron-preload'};
+  //const main = {name: 'main', entry: {index: './main/index'}, target: 'electron-main'};
+  return [
+    {...cf, ...renderer}, //{...cf, ...main}, {...cf, ...preload},
+  ];
+} // configure
