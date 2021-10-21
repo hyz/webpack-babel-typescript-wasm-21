@@ -100,16 +100,16 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
   //  },
   //});
 
-  const cssLoader = <RuleSetUseItem>{
-    loader: 'css-loader',
-    options: {
-      sourceMap: isDev,
-      modules: {
-        auto: true,
-        localIdentName: isDev ? '[name]_[local]_[contenthash:8]' : '[hash:base64]',
-      },
-    },
-  };
+  //const cssLoader = <RuleSetUseItem>{
+  //  loader: 'css-loader',
+  //  options: {
+  //    sourceMap: isDev,
+  //    modules: {
+  //      auto: true,
+  //      localIdentName: isDev ? '[name]_[local]_[contenthash:8]' : '[hash:base64]',
+  //    },
+  //  },
+  //};
 
   const config: Configuration = {
     mode: opts.mode,
@@ -171,16 +171,16 @@ export function configure(output: Output, cfgs: CustomConfigs, opts: Options): C
         //   transpileOnly: true,
         // });
         {
-          test: /\.(sass|scss|css)$/i,
-          use: [
-            isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-            cssLoader,
-            'sass-loader',
-            {
-              loader: 'postcss-loader',
-              //options: { postcssOptions: { ident: 'postcss', plugins: [tailwindcss, autoprefixer], }, },
-            },
-          ],
+          test: /\.css$/,
+          use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
+        },
+        {
+          test: /\.(sass|scss)$/,
+          use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader', 'sass-loader'],
+        },
+        {
+          test: /\.less$/,
+          use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader', 'less-loader'],
         },
         //{
         //  test: /\.css$/,

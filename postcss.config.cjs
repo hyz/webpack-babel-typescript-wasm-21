@@ -1,11 +1,14 @@
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-    // 'postcss-import': {},
-    // 'postcss-nested': {},
-    // 'postcss-preset-env': {},
-    // 'postcss-pxtorem': {
+const tailwindcss = require('tailwindcss');
+const autoprefixer = require('autoprefixer');
+
+module.exports = /*function (api)*/ {
+  plugins: [
+    tailwindcss,
+    autoprefixer,
+    'postcss-import',
+    'postcss-nested',
+    'postcss-preset-env',
+    // ['postcss-pxtorem': {
     //   rootValue: 16,
     //   unitPrecision: 5,
     //   propList: ['*'],
@@ -13,6 +16,6 @@ module.exports = {
     //   replace: true,
     //   mediaQuery: false,
     //   minPixelValue: 0,
-    // },
-  },
+    // }],
+  ],
 };
