@@ -7,7 +7,7 @@ usage:
 	echo "open http://4000.local/dist"
 
 webpack name mode='production':
-	yarn webpack build --mode {{mode}} --config-name {{name}}
+	yarn webpack build --config-name {{name}} --mode {{mode}}
 
 clean name='dist':
 	yarn rimraf {{name}}

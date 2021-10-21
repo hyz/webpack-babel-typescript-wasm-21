@@ -4,7 +4,7 @@
   "description": "Template for TypeScript & rust development.",
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "main": "electron/main.js",
+  "main": "./main/index.js",
   "scripts": {
     "dev": "webpack serve --mode=development",
     "build": "webpack --mode=production",
